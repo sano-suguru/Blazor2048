@@ -7,6 +7,14 @@ public class GameManager(Board board)
     public Board Board { get; private set; } = board;
     public int Score { get; private set; }
 
+    public void Move(string direction)
+    {
+        if (Enum.TryParse(direction, true, out Direction dir))
+        {
+            Move(dir);
+        }
+    }
+
     public void Move(Direction direction)
     {
         if (!Board.MoveTiles(direction)) return;

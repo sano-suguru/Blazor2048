@@ -17,8 +17,8 @@
     {
         @for (int j = 0; j < 4; j++)
         {
-            <div class="tile tile-@gameManager.Board.Tiles[i, j]">
-                @(gameManager.Board.Tiles[i, j] != 0 ? gameManager.Board.Tiles[i, j].ToString() : "")
+            <div class="tile tile-@gameManager.Board.Tiles[i, j].Value">
+                @(gameManager.Board.Tiles[i, j].Value != 0 ? gameManager.Board.Tiles[i, j].Value.ToString() : "")
             </div>
         }
     }
