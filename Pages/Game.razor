@@ -25,7 +25,7 @@
 </div>
 
 @code {
-    private GameManager gameManager = null!;
+    [Inject] private GameManager gameManager { get; set; } = default!;
     private ElementReference gameBoardRef;
     private bool gameOver = false;
 
@@ -33,7 +33,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        gameManager = new GameManager(new Board());
         await JS.InvokeVoidAsync("focusGameBoard");
     }
 
