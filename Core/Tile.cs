@@ -1,33 +1,33 @@
 namespace Blazor2048.Core;
 
-public static class Tile
+public class Tile(int value)
 {
-    public static int[] MergeLine(int[] line, ref bool moved)
+    public int Value { get; private set; } = value;
+
+    public static Tile[] MergeLine(Tile[] line, ref bool moved)
     {
-        List<int> newLine = new();
+        List<Tile> newLine = new();
         bool hasMerged = false;
-        int lineScore = 0;
 
         for (int i = 0; i < line.Length; i++)
         {
-            if (line[i] == 0) continue;
+            if (line[i].Value == 0) continue;
 
-            if (newLine.Count > 0 && newLine.Last() == line[i] && !hasMerged)
+            if (newLine.Count > 0 && newLine.Last().Value == line[i].Value && !hasMerged)
             {
-                newLine[^1] *= 2;
-                lineScore += newLine[^1];
+                newLine[^1] = new Tile(newLine[^1].Value * 2);
                 hasMerged = true;
                 moved = true;
             }
             else
             {
-                newLine.Add(line[i]);
+                newLine.Add(new Tile(line[i].Value));
                 hasMerged = false;
             }
         }
 
         while (newLine.Count < line.Length)
-            newLine.Add(0);
+            newLine.Add(new Tile(0));
 
         return newLine.ToArray();
     }
