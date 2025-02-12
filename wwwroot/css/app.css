@@ -1,34 +1,49 @@
 /* 2048 のボードデザイン */
-.board {
-    display: grid;
-    grid-template-rows: repeat(4, 100px);
-    grid-template-columns: repeat(4, 100px);
-    gap: 5px;
-    background: #bbada0;
-    padding: 10px;
-    border-radius: 10px;
-    position: relative;
-    width: 430px;
-    outline: none;
-    /* フォーカス時の枠線を消す */
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(45deg, #faf8ef, #f3f0e6);
+    overflow: hidden;
+    /* はみ出し防止 */
 }
 
-/* ボードフォーカス時の強調 */
+.board {
+    display: grid;
+    grid-template-rows: repeat(4, minmax(60px, min(10vh, 10vw)));
+    grid-template-columns: repeat(4, minmax(60px, min(10vh, 10vw)));
+    gap: 8px;
+    background: #bbada0;
+    padding: 15px;
+    border-radius: 15px;
+    position: relative;
+    outline: none;
+    max-width: 90vh;
+    /* PC での過剰な拡大を防ぐ */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* フォーカス時の強調 */
 .board:focus {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
 /* タイルの基本デザイン */
 .tile {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: clamp(14px, 4vw, 36px);
     font-weight: bold;
-    border-radius: 5px;
-    transition: transform 0.2s ease-in-out, background 0.3s ease-in-out;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+    transform: scale(1);
+    will-change: transform, background, color;
 }
 
 /* 新しいタイルが出現する際のアニメーション */
@@ -44,6 +59,11 @@
 
 .tile-new {
     animation: scaleUp 0.2s ease-in-out;
+}
+
+/* タイルが移動するアニメーション */
+.tile-move {
+    transition: transform 0.15s ease-in-out;
 }
 
 /* 各タイルの色 */
@@ -85,62 +105,127 @@
 .tile-128 {
     background: #edcf72;
     color: #f9f6f2;
+    font-size: clamp(16px, 4vw, 36px);
 }
 
 .tile-256 {
     background: #edcc61;
     color: #f9f6f2;
+    font-size: clamp(16px, 4vw, 36px);
 }
 
 .tile-512 {
     background: #edc850;
     color: #f9f6f2;
+    font-size: clamp(16px, 4vw, 36px);
 }
 
 .tile-1024 {
     background: #edc53f;
     color: #f9f6f2;
+    font-size: clamp(14px, 3.5vw, 32px);
 }
 
 .tile-2048 {
     background: #edc22e;
     color: #f9f6f2;
+    font-size: clamp(14px, 3.5vw, 32px);
 }
 
 .tile-super {
     background: #3c3a32;
     color: #f9f6f2;
+    font-size: clamp(12px, 3vw, 28px);
 }
 
 /* スコアのデザイン */
-h3 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    text-align: center;
-    color: #776e65;
+.score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #8f7a66;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-bottom: 15px;
 }
 
-/* ゲームオーバーのスタイル */
-h2 {
-    color: red;
-    text-align: center;
+/* ゲームオーバーのオーバーレイ */
+.game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 28px;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
 }
 
 /* ゲームオーバー時のボタン */
 button {
     display: block;
-    margin: 10px auto;
-    padding: 10px 20px;
+    margin: 15px auto;
+    padding: 12px 25px;
     font-size: 18px;
     border: none;
     background: #8f7a66;
     color: white;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s ease-in-out;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 button:hover {
     background: #776e65;
+}
+
+/* レスポンシブ調整 */
+/* スコアのデザイン */
+.score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #8f7a66;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-bottom: 15px;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 600px) {
+    .board {
+        width: 90vw;
+        grid-template-rows: repeat(4, 22vw);
+        grid-template-columns: repeat(4, 22vw);
+    }
+
+    .tile {
+        font-size: clamp(14px, 5vw, 32px);
+    }
+
+    .score-container {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    button {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
 }
