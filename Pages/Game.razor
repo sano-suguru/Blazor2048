@@ -1,0 +1,80 @@
+@page "/game"
+@using Blazor2048.Core
+@using Blazor2048.GameLogic
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+
+<h3>スコア: @gameManager.Score</h3>
+
+@if (gameOver)
+{
+    <h2>ゲームオーバー！</h2>
+    <button @onclick="RestartGame">もう一度プレイ</button>
+}
+
+<div class="board" tabindex="0" @onkeydown="HandleKeyPress" @ref="gameBoardRef">
+    @for (int i = 0; i < 4; i++)
+    {
+        @for (int j = 0; j < 4; j++)
+        {
+            <div class="tile tile-@gameManager.Board.Tiles[i, j]">
+                @(gameManager.Board.Tiles[i, j] != 0 ? gameManager.Board.Tiles[i, j].ToString() : "")
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private GameManager gameManager = null!;
+    private ElementReference gameBoardRef;
+    private bool gameOver = false;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        gameManager = new GameManager(new Board());
+        await JS.InvokeVoidAsync("focusGameBoard");
+    }
+
+    private void OnSwipe(string direction)
+    {
+        if (gameOver) return;
+
+        gameManager.Move(direction);
+        CheckGameStatus();
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (gameOver) return;
+
+        Direction? direction = e.Key switch
+        {
+            "ArrowUp" => Direction.Up,
+            "ArrowDown" => Direction.Down,
+            "ArrowLeft" => Direction.Left,
+            "ArrowRight" => Direction.Right,
+            _ => null
+        };
+
+        if (direction.HasValue)
+        {
+            gameManager.Move(direction.Value);
+            CheckGameStatus();
+        }
+    }
+
+    private void CheckGameStatus()
+    {
+        if (gameManager.IsGameOver()) gameOver = true;
+        StateHasChanged();
+    }
+
+    private void RestartGame()
+    {
+        gameManager.Restart();
+        gameOver = false;
+        StateHasChanged();
+    }
+}
