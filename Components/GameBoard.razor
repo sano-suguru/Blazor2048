@@ -1,0 +1,32 @@
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using global::Blazor2048.Core
+
+<div class="board" tabindex="0" @onkeydown="HandleKeyPress" @ref="boardRef">
+    @for (int i = 0; i < Board.Size; i++)
+    {
+        @for (int j = 0; j < Board.Size; j++)
+        {
+            <GameTile Value="Board.Tiles[i, j].Value" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public Board Board { get; set; } = default!;
+    [Parameter] public EventCallback<KeyboardEventArgs> OnKeyPress { get; set; }
+    private ElementReference boardRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await boardRef.FocusAsync(); // キーボード入力を受け付けるためにフォーカスを設定
+        }
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        await OnKeyPress.InvokeAsync(e);
+    }
+}

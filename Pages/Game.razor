@@ -1,8 +1,9 @@
 @page "/game"
-@using Blazor2048.Core
-@using Blazor2048.GameLogic
+@using Blazor2048.Components
 @using Microsoft.AspNetCore.Components
-@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Web
+@using global::Blazor2048.Core
+@using global::Blazor2048.GameLogic
 
 <h3>スコア: @gameManager.Score</h3>
 
@@ -12,37 +13,11 @@
     <button @onclick="RestartGame">もう一度プレイ</button>
 }
 
-<div class="board" tabindex="0" @onkeydown="HandleKeyPress" @ref="gameBoardRef">
-    @for (int i = 0; i < 4; i++)
-    {
-        @for (int j = 0; j < 4; j++)
-        {
-            <div class="tile tile-@gameManager.Board.Tiles[i, j].Value">
-                @(gameManager.Board.Tiles[i, j].Value != 0 ? gameManager.Board.Tiles[i, j].Value.ToString() : "")
-            </div>
-        }
-    }
-</div>
+<GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
 
 @code {
     [Inject] private GameManager gameManager { get; set; } = default!;
-    private ElementReference gameBoardRef;
     private bool gameOver = false;
-
-    [Inject] private IJSRuntime JS { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await JS.InvokeVoidAsync("focusGameBoard");
-    }
-
-    private void OnSwipe(string direction)
-    {
-        if (gameOver) return;
-
-        gameManager.Move(direction);
-        CheckGameStatus();
-    }
 
     private void HandleKeyPress(KeyboardEventArgs e)
     {

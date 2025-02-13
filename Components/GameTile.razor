@@ -1,0 +1,9 @@
+@using Microsoft.AspNetCore.Components
+
+<div class="tile tile-@Value">
+    @(Value != 0 ? Value.ToString() : "")
+</div>
+
+@code {
+    [Parameter] public int Value { get; set; }
+}
