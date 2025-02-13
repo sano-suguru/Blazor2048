@@ -9,8 +9,13 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped<Board>();
-builder.Services.AddScoped<GameManager>();
+// ロギングの設定
+builder.Services.AddLogging(builder => builder
+    .SetMinimumLevel(LogLevel.Information));
+
+// 依存関係の注入
+builder.Services.AddScoped<IRandomGenerator, DefaultRandomGenerator>();
+builder.Services.AddScoped<IGameManager, GameManager>();
 
 try
 {
@@ -18,5 +23,5 @@ try
 }
 catch (Exception ex)
 {
-    Console.Error.WriteLine($"Application startup failed: {ex.ToString()}");
+    Console.Error.WriteLine($"Application startup failed: {ex}");
 }

@@ -2,11 +2,11 @@ namespace Blazor2048.Core;
 
 public class Tile(int value)
 {
-    public int Value { get; private set; } = value;
+    public int Value { get; } = value;
 
     public static Tile[] MergeLine(Tile[] line, ref bool moved)
     {
-        List<Tile> newLine = new();
+        List<Tile> newLine = [];
         bool hasMerged = false;
 
         for (int i = 0; i < line.Length; i++)
@@ -31,4 +31,12 @@ public class Tile(int value)
 
         return [.. newLine];
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Tile other) return false;
+        return Value == other.Value;
+    }
+
+    public override int GetHashCode() => Value.GetHashCode();
 }

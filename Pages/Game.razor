@@ -2,22 +2,50 @@
 @using Blazor2048.Components
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
-@using global::Blazor2048.Core
-@using global::Blazor2048.GameLogic
+@using Blazor2048.Core
+@using Blazor2048.GameLogic
+@implements IDisposable
 
-<h3>スコア: @gameManager.Score</h3>
+<div class="game-container">
+    <div class="score-container">
+        <span>スコア</span>
+        <span class="score-value">@gameManager.CurrentScore.Value</span>
+    </div>
 
-@if (gameOver)
-{
-    <h2>ゲームオーバー！</h2>
-    <button @onclick="RestartGame">もう一度プレイ</button>
-}
+    @if (gameOver)
+    {
+        <div class="game-over">
+            <h2>ゲームオーバー！</h2>
+            <button @onclick="RestartGame">もう一度プレイ</button>
+        </div>
+    }
 
-<GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
+    <GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
+</div>
 
 @code {
-    [Inject] private GameManager gameManager { get; set; } = default!;
+    [Inject] private IGameManager gameManager { get; set; } = default!;
+    [Inject] private ILogger<Game> logger { get; set; } = default!;
     private bool gameOver = false;
+
+    protected override void OnInitialized()
+    {
+        gameManager.ScoreChanged += HandleScoreChanged;
+        gameManager.GameOver += HandleGameOver;
+    }
+
+    private void HandleScoreChanged(object? sender, Score score)
+    {
+        logger.LogInformation("Score updated to: {Score}", score.Value);
+        StateHasChanged();
+    }
+
+    private void HandleGameOver(object? sender, EventArgs e)
+    {
+        logger.LogInformation("Game over triggered");
+        gameOver = true;
+        StateHasChanged();
+    }
 
     private void HandleKeyPress(KeyboardEventArgs e)
     {
@@ -34,21 +62,28 @@
 
         if (direction.HasValue)
         {
-            gameManager.Move(direction.Value);
-            CheckGameStatus();
+            try
+            {
+                gameManager.Move(direction.Value);
+            }
+            catch (GameException ex)
+            {
+                logger.LogError(ex, "Error processing move");
+            }
         }
-    }
-
-    private void CheckGameStatus()
-    {
-        if (gameManager.IsGameOver()) gameOver = true;
-        StateHasChanged();
     }
 
     private void RestartGame()
     {
+        logger.LogInformation("Restarting game");
         gameManager.Restart();
         gameOver = false;
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        gameManager.ScoreChanged -= HandleScoreChanged;
+        gameManager.GameOver -= HandleGameOver;
     }
 }
