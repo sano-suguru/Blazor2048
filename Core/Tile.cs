@@ -29,6 +29,6 @@ public class Tile(int value)
         while (newLine.Count < line.Length)
             newLine.Add(new Tile(0));
 
-        return newLine.ToArray();
+        return [.. newLine];
     }
 }
