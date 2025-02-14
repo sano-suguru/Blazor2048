@@ -1,18 +1,20 @@
+// GameLogic/GameManager.cs
 using Blazor2048.Core;
 
 namespace Blazor2048.GameLogic;
 
-public class GameManager : IGameManager
+public class GameManager : IGameManager, IDisposable
 {
     public IGameBoard Board { get; private set; }
-    public Score CurrentScore { get; private set; }
+    public GameState State { get; private set; }
 
     private readonly ILogger<GameManager> _logger;
     private readonly IRandomGenerator _randomGenerator;
     private readonly ILoggerFactory _loggerFactory;
+    private bool _isDisposed;
 
-    public event EventHandler<Score>? ScoreChanged;
-    public event EventHandler? GameOver;
+    public event EventHandler<GameState>? StateChanged;
+    public event EventHandler<TileMergedEventArgs>? TileMerged;
 
     public GameManager(
         ILogger<GameManager> logger,
@@ -22,12 +24,17 @@ public class GameManager : IGameManager
         _logger = logger;
         _randomGenerator = randomGenerator;
         _loggerFactory = loggerFactory;
-        Board = new Board(_randomGenerator, _loggerFactory.CreateLogger<Board>());
-        CurrentScore = Score.Zero;
+
+        Board = CreateNewBoard();
+        State = GameState.Initial;
+
+        SubscribeToBoardEvents();
     }
 
     public void Move(string direction)
     {
+        if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
+
         if (Enum.TryParse(direction, true, out Direction dir))
         {
             Move(dir);
@@ -40,23 +47,16 @@ public class GameManager : IGameManager
 
     public void Move(Direction direction)
     {
+        if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
+        if (State.IsGameOver) return;
+
         try
         {
             _logger.LogInformation("Attempting move in direction: {Direction}", direction);
 
             if (!Board.MoveTiles(direction)) return;
 
-            var newScore = CalculateScore();
-            if (newScore.Value != CurrentScore.Value)
-            {
-                CurrentScore = newScore;
-                OnScoreChanged();
-            }
-
-            if (IsGameOver())
-            {
-                OnGameOver();
-            }
+            UpdateGameState();
         }
         catch (GameException ex)
         {
@@ -67,10 +67,37 @@ public class GameManager : IGameManager
 
     public void Restart()
     {
+        if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
+
         _logger.LogInformation("Restarting game");
-        Board = new Board(_randomGenerator, _loggerFactory.CreateLogger<Board>());
-        CurrentScore = Score.Zero;
-        OnScoreChanged();
+
+        UnsubscribeFromBoardEvents();
+        Board = CreateNewBoard();
+        SubscribeToBoardEvents();
+
+        State = GameState.Initial;
+        OnStateChanged();
+    }
+
+    private Board CreateNewBoard() =>
+        new(_randomGenerator, _loggerFactory.CreateLogger<Board>());
+
+    private void UpdateGameState()
+    {
+        var newScore = CalculateScore();
+        var isGameOver = Board.IsGameOver();
+
+        var newState = State with
+        {
+            CurrentScore = newScore,
+            IsGameOver = isGameOver
+        };
+
+        if (newState != State)
+        {
+            State = newState;
+            OnStateChanged();
+        }
     }
 
     private Score CalculateScore()
@@ -79,25 +106,60 @@ public class GameManager : IGameManager
         return new Score(score);
     }
 
-    public bool IsGameOver()
+    private void HandleTileMerged(object? sender, TileMergedEventArgs e)
     {
-        var isOver = Board.IsGameOver();
-        if (isOver)
+        _logger.LogDebug("Tile merged event received: {OldValue} -> {NewValue} at {Position}",
+            e.OldValue, e.NewValue, e.Position);
+
+        OnTileMerged(e);
+        UpdateGameState();
+    }
+
+    protected virtual void OnStateChanged()
+    {
+        _logger.LogInformation("Game state changed. Score: {Score}, GameOver: {IsGameOver}",
+            State.CurrentScore.Value, State.IsGameOver);
+
+        StateChanged?.Invoke(this, State);
+    }
+
+    protected virtual void OnTileMerged(TileMergedEventArgs e)
+    {
+        TileMerged?.Invoke(this, e);
+    }
+
+    private void SubscribeToBoardEvents()
+    {
+        if (Board is not null)
         {
-            _logger.LogInformation("Game over detected. Final score: {Score}", CurrentScore.Value);
+            Board.TileMerged += HandleTileMerged;
         }
-        return isOver;
     }
 
-    protected virtual void OnScoreChanged()
+    private void UnsubscribeFromBoardEvents()
     {
-        _logger.LogInformation("Score changed to: {Score}", CurrentScore.Value);
-        ScoreChanged?.Invoke(this, CurrentScore);
+        if (Board is not null)
+        {
+            Board.TileMerged -= HandleTileMerged;
+        }
     }
 
-    protected virtual void OnGameOver()
+    protected virtual void Dispose(bool disposing)
     {
-        _logger.LogInformation("Game over event triggered");
-        GameOver?.Invoke(this, EventArgs.Empty);
+        if (!_isDisposed)
+        {
+            if (disposing)
+            {
+                UnsubscribeFromBoardEvents();
+            }
+
+            _isDisposed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
