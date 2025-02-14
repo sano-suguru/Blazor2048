@@ -75,8 +75,10 @@ public class Board : IGameBoard
                 SetLineMap[direction](this, i, mergedLine);
             }
 
-            if (moved)
+            bool hasChanged = !AreBoardsEqual(originalTiles, Tiles);
+            if (hasChanged)
             {
+                moved = true;
                 AddNewTile();
                 CheckAndRaiseMergeEvents(originalTiles);
             }
@@ -88,6 +90,12 @@ public class Board : IGameBoard
         }
 
         return moved;
+    }
+
+    private static bool AreBoardsEqual(Tile[,] board1, Tile[,] board2)
+    {
+        return board1.Cast<Tile>().Select(t => t.Value)
+            .SequenceEqual(board2.Cast<Tile>().Select(t => t.Value));
     }
 
     public bool CanMove(Direction direction)
