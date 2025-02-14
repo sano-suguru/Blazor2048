@@ -33,7 +33,7 @@ public class GameManager : IGameManager, IDisposable
 
     public void Move(string direction)
     {
-        if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         if (Enum.TryParse(direction, true, out Direction dir))
         {
