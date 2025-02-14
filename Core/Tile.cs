@@ -1,42 +1,66 @@
 namespace Blazor2048.Core;
 
-public class Tile(int value)
+public class Tile
 {
-    public int Value { get; } = value;
+    public int Value { get; }
+    public bool IsMerged { get; private set; }
+
+    public Tile(int value, bool isMerged = false)
+    {
+        Value = value;
+        IsMerged = isMerged;
+    }
+
+    public static Tile Empty => new(0);
+
+    public bool IsEmpty => Value == 0;
+
+    public bool CanMergeWith(Tile other) =>
+        !IsEmpty && !IsMerged && !other.IsMerged && Value == other.Value;
+
+    public Tile MergeWith(Tile other)
+    {
+        if (!CanMergeWith(other))
+            throw new GameException("Cannot merge incompatible tiles");
+
+        return new Tile(Value * 2, true);
+    }
 
     public static Tile[] MergeLine(Tile[] line, ref bool moved)
     {
-        List<Tile> newLine = [];
-        bool hasMerged = false;
+        var newLine = new List<Tile>();
+        var hasMerged = false;
 
-        for (int i = 0; i < line.Length; i++)
+        foreach (var tile in line.Where(t => !t.IsEmpty))
         {
-            if (line[i].Value == 0) continue;
-
-            if (newLine.Count > 0 && newLine.Last().Value == line[i].Value && !hasMerged)
+            if (newLine.Count > 0 && !hasMerged && newLine[^1].CanMergeWith(tile))
             {
-                newLine[^1] = new Tile(newLine[^1].Value * 2);
+                newLine[^1] = newLine[^1].MergeWith(tile);
                 hasMerged = true;
                 moved = true;
             }
             else
             {
-                newLine.Add(new Tile(line[i].Value));
+                newLine.Add(new Tile(tile.Value));
                 hasMerged = false;
             }
         }
 
         while (newLine.Count < line.Length)
-            newLine.Add(new Tile(0));
+            newLine.Add(Tile.Empty);
 
         return [.. newLine];
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is not Tile other) return false;
-        return Value == other.Value;
-    }
+    public override bool Equals(object? obj) =>
+        obj is Tile other && Value == other.Value && IsMerged == other.IsMerged;
 
-    public override int GetHashCode() => Value.GetHashCode();
+    public override int GetHashCode() =>
+        HashCode.Combine(Value, IsMerged);
+
+    public static bool operator ==(Tile? left, Tile? right) =>
+        left?.Equals(right) ?? right is null;
+
+    public static bool operator !=(Tile? left, Tile? right) =>
+        !(left == right);
 }
