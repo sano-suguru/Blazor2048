@@ -1,9 +1,21 @@
 @using Microsoft.AspNetCore.Components
 
-<div class="tile tile-@Value">
+<div class="tile @GetTileClass()" data-value="@Value">
     @(Value != 0 ? Value.ToString() : "")
 </div>
 
 @code {
     [Parameter] public int Value { get; set; }
+
+    private string GetTileClass()
+    {
+        var baseClass = "tile";
+        var valueClass = Value switch
+        {
+            0 => "tile-empty",
+            > 2048 => "tile-super",
+            _ => $"tile-{Value}"
+        };
+        return $"{baseClass} {valueClass}";
+    }
 }
