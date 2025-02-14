@@ -5,11 +5,12 @@ namespace Blazor2048.GameLogic;
 public interface IGameManager
 {
     IGameBoard Board { get; }
-    Score CurrentScore { get; }
+    GameState State { get; }
     void Move(Direction direction);
     void Move(string direction);
     void Restart();
-    bool IsGameOver();
-    event EventHandler<Score>? ScoreChanged;
-    event EventHandler? GameOver;
+
+    event EventHandler<GameState>? StateChanged;
+    event EventHandler<TileMergedEventArgs>? TileMerged;
 }
+
