@@ -1,4 +1,3 @@
-// Core/Board.cs
 namespace Blazor2048.Core;
 
 public class Board : IGameBoard
