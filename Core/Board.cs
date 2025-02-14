@@ -1,10 +1,10 @@
 // Core/Board.cs
 namespace Blazor2048.Core;
 
-public class Board(IRandomGenerator random, ILogger<Board> logger) : IGameBoard
+public class Board : IGameBoard
 {
-    private readonly IRandomGenerator _random = random;
-    private readonly ILogger<Board> _logger = logger;
+    private readonly IRandomGenerator _random;
+    private readonly ILogger<Board> _logger;
 
     public Tile[,] Tiles { get; private set; } = new Tile[GameConstants.BoardSize, GameConstants.BoardSize];
     public event EventHandler<TileMergedEventArgs>? TileMerged;
@@ -25,6 +25,14 @@ public class Board(IRandomGenerator random, ILogger<Board> logger) : IGameBoard
         { Direction.Down, (board, i, line) => { for (int j = 0; j < GameConstants.BoardSize; j++) board.Tiles[GameConstants.BoardSize - 1 - j, i] = line[j]; } }
     };
 
+    public Board(IRandomGenerator random, ILogger<Board> logger)
+    {
+        _random = random;
+        _logger = logger;
+        Initialize();
+    }
+
+    // 初期状態を指定するコンストラクタ
     public Board(IRandomGenerator random, ILogger<Board> logger, int[,] initialState) : this(random, logger)
     {
         if (initialState.GetLength(0) != GameConstants.BoardSize || initialState.GetLength(1) != GameConstants.BoardSize)
@@ -35,6 +43,7 @@ public class Board(IRandomGenerator random, ILogger<Board> logger) : IGameBoard
                 Tiles[i, j] = new Tile(initialState[i, j]);
     }
 
+    // 他のボードをコピーするコンストラクタ
     public Board(IRandomGenerator random, ILogger<Board> logger, Board other) : this(random, logger)
     {
         Tiles = (Tile[,])other.Tiles.Clone();
@@ -42,10 +51,12 @@ public class Board(IRandomGenerator random, ILogger<Board> logger) : IGameBoard
 
     private void Initialize()
     {
+        // 空のタイルで初期化
         for (int i = 0; i < GameConstants.BoardSize; i++)
             for (int j = 0; j < GameConstants.BoardSize; j++)
-                Tiles[i, j] = Tile.Empty;
+                Tiles[i, j] = new Tile(0);
 
+        // 初期タイルを配置
         for (int i = 0; i < GameConstants.InitialTileCount; i++)
             AddNewTile();
     }

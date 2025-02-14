@@ -1,4 +1,3 @@
-// GameLogic/GameManager.cs
 using Blazor2048.Core;
 
 namespace Blazor2048.GameLogic;
