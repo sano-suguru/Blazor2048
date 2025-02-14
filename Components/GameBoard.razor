@@ -2,13 +2,17 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Blazor2048.Core
 
-<div class="board" tabindex="0" @onkeydown="HandleKeyPress" @ref="boardRef">
+<div class="board" tabindex="0" @onkeydown="HandleKeyPress" @ref="boardRef" role="grid" aria-label="2048 game board">
     @for (int i = 0; i < GameConstants.BoardSize; i++)
     {
-        @for (int j = 0; j < GameConstants.BoardSize; j++)
-        {
-            <GameTile Value="Board.Tiles[i, j].Value" />
-        }
+        <div class="board-row" role="row">
+            @for (int j = 0; j < GameConstants.BoardSize; j++)
+            {
+                <div class="board-cell" role="gridcell">
+                    <GameTile Value="Board.Tiles[i, j].Value" />
+                </div>
+            }
+        </div>
     }
 </div>
 
@@ -21,7 +25,15 @@
     {
         if (firstRender)
         {
-            await boardRef.FocusAsync();
+            try
+            {
+                await boardRef.FocusAsync();
+            }
+            catch (Exception ex)
+            {
+                // フォーカスの設定に失敗しても致命的ではないため、ログのみ
+                Console.Error.WriteLine($"Failed to focus board: {ex.Message}");
+            }
         }
     }
 
