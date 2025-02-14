@@ -1,14 +1,31 @@
 ﻿@using Blazor2048.Shared
 
-<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
+<ErrorBoundary>
+    <ChildContent>
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert">申し訳ありません。このページは存在しません。</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </ChildContent>
+    <ErrorContent Context="exception">
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">申し訳ありません。このページは存在しません。</p>
+            <div class="error-container" role="alert">
+                <h1>エラーが発生しました</h1>
+                <p>@exception.Message</p>
+                @if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    <p>詳細なエラー情報:</p>
+                    <pre>@exception.ToString()</pre>
+                }
+            </div>
         </LayoutView>
-    </NotFound>
-</Router>
+    </ErrorContent>
+</ErrorBoundary>
