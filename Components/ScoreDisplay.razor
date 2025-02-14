@@ -1,0 +1,10 @@
+@using Blazor2048.Core
+
+<div class="score-container" role="status" aria-live="polite">
+    <span class="score-label">@GameConstants.UI.ScoreLabel</span>
+    <span class="score-value">@Score.Value.ToString("N0")</span>
+</div>
+
+@code {
+    [Parameter] public Score Score { get; set; }
+}
