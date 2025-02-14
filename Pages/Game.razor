@@ -7,64 +7,63 @@
 @implements IDisposable
 
 <div class="game-container">
-    <div class="score-container">
-        <span>スコア</span>
-        <span class="score-value">@gameManager.CurrentScore.Value</span>
-    </div>
+    <ScoreDisplay Score="@gameManager.State.CurrentScore" />
 
-    @if (gameOver)
+    @if (gameManager.State.IsGameOver)
     {
-        <div class="game-over">
-            <h2>ゲームオーバー！</h2>
-            <button @onclick="RestartGame">もう一度プレイ</button>
+        <div class="game-over" role="alert">
+            <h2>@GameConstants.UI.GameOverMessage</h2>
+            <button @onclick="RestartGame" class="restart-button">
+                @GameConstants.UI.RestartButtonText
+            </button>
         </div>
     }
 
-    <GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
+    <ErrorBoundary>
+        <ChildContent>
+            <GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
+        </ChildContent>
+        <ErrorContent>
+            <div class="error-message" role="alert">
+                申し訳ありません。エラーが発生しました。
+                <button @onclick="RestartGame">ゲームをリスタート</button>
+            </div>
+        </ErrorContent>
+    </ErrorBoundary>
 </div>
 
 @code {
     [Inject] private IGameManager gameManager { get; set; } = default!;
     [Inject] private ILogger<Game> logger { get; set; } = default!;
-    private bool gameOver = false;
 
     protected override void OnInitialized()
     {
-        gameManager.ScoreChanged += HandleScoreChanged;
-        gameManager.GameOver += HandleGameOver;
+        gameManager.StateChanged += HandleStateChanged;
+        gameManager.TileMerged += HandleTileMerged;
     }
 
-    private void HandleScoreChanged(object? sender, Score score)
+    private void HandleStateChanged(object? sender, GameState state)
     {
-        logger.LogInformation("Score updated to: {Score}", score.Value);
+        logger.LogInformation("Game state updated: Score={Score}, GameOver={IsGameOver}",
+        state.CurrentScore.Value, state.IsGameOver);
         StateHasChanged();
     }
 
-    private void HandleGameOver(object? sender, EventArgs e)
+    private void HandleTileMerged(object? sender, TileMergedEventArgs e)
     {
-        logger.LogInformation("Game over triggered");
-        gameOver = true;
-        StateHasChanged();
+        logger.LogDebug("Tile merged: {OldValue} -> {NewValue} at position {Position}",
+        e.OldValue, e.NewValue, e.Position);
     }
 
     private void HandleKeyPress(KeyboardEventArgs e)
     {
-        if (gameOver) return;
+        if (gameManager.State.IsGameOver) return;
 
-        Direction? direction = e.Key switch
-        {
-            "ArrowUp" => Direction.Up,
-            "ArrowDown" => Direction.Down,
-            "ArrowLeft" => Direction.Left,
-            "ArrowRight" => Direction.Right,
-            _ => null
-        };
-
-        if (direction.HasValue)
+        if (Move.FromKeyboardEvent(e) is Move move)
         {
             try
             {
-                gameManager.Move(direction.Value);
+                gameManager.Move(move.Direction);
             }
             catch (GameException ex)
             {
@@ -77,13 +76,12 @@
     {
         logger.LogInformation("Restarting game");
         gameManager.Restart();
-        gameOver = false;
-        StateHasChanged();
     }
 
     public void Dispose()
     {
-        gameManager.ScoreChanged -= HandleScoreChanged;
-        gameManager.GameOver -= HandleGameOver;
+        logger.LogInformation("Disposing Game component");
+        gameManager.StateChanged -= HandleStateChanged;
+        gameManager.TileMerged -= HandleTileMerged;
     }
 }
