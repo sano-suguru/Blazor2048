@@ -29,25 +29,35 @@ public class Tile
     public static Tile[] MergeLine(Tile[] line, ref bool moved)
     {
         var newLine = new List<Tile>();
-        var hasMerged = false;
 
+        // まず非空のタイルを圧縮して移動
         foreach (var tile in line.Where(t => !t.IsEmpty))
         {
-            if (newLine.Count > 0 && !hasMerged && newLine[^1].CanMergeWith(tile))
+            newLine.Add(new Tile(tile.Value));
+        }
+
+        // 元の配列と長さが違えば移動が発生している
+        if (newLine.Count != line.Count(t => !t.IsEmpty))
+        {
+            moved = true;
+        }
+
+        // マージ処理
+        for (int i = 0; i < newLine.Count - 1; i++)
+        {
+            if (newLine[i].Value == newLine[i + 1].Value)
             {
-                newLine[^1] = newLine[^1].MergeWith(tile);
-                hasMerged = true;
+                newLine[i] = new Tile(newLine[i].Value * 2);
+                newLine.RemoveAt(i + 1);
                 moved = true;
-            }
-            else
-            {
-                newLine.Add(new Tile(tile.Value));
-                hasMerged = false;
             }
         }
 
+        // 残りのスペースを0で埋める
         while (newLine.Count < line.Length)
+        {
             newLine.Add(Tile.Empty);
+        }
 
         return [.. newLine];
     }
