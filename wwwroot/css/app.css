@@ -4,26 +4,33 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(45deg, #faf8ef, #f3f0e6);
-    overflow: hidden;
-    /* はみ出し防止 */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    width: 100%;
 }
 
 .board {
     display: grid;
-    grid-template-rows: repeat(4, minmax(60px, min(10vh, 10vw)));
-    grid-template-columns: repeat(4, minmax(60px, min(10vh, 10vw)));
+    grid-template-rows: repeat(4, minmax(60px, min(20vh, 20vw)));
+    grid-template-columns: repeat(4, minmax(60px, min(20vh, 20vw)));
     gap: 8px;
     background: #bbada0;
     padding: 15px;
     border-radius: 15px;
     position: relative;
     outline: none;
-    max-width: 90vh;
-    /* PC での過剰な拡大を防ぐ */
+    width: 100%;
+    aspect-ratio: 1;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease-in-out;
 }
 
 /* フォーカス時の強調 */
@@ -140,18 +147,25 @@
 
 /* スコアのデザイン */
 .score-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     background: #8f7a66;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-    padding: 10px;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    margin-bottom: 15px;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    color: white;
+    min-width: 200px;
+    text-align: center;
+}
+
+.score-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.score-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 /* ゲームオーバーのオーバーレイ */
@@ -210,23 +224,23 @@ button:hover {
 /* レスポンシブ調整 */
 @media (max-width: 600px) {
     .board {
-        width: 90vw;
-        grid-template-rows: repeat(4, 22vw);
-        grid-template-columns: repeat(4, 22vw);
+        grid-template-rows: repeat(4, minmax(50px, 22vw));
+        grid-template-columns: repeat(4, minmax(50px, 22vw));
+        gap: 5px;
+        padding: 10px;
     }
 
     .tile {
-        font-size: clamp(14px, 5vw, 32px);
+        font-size: clamp(14px, 5vw, 24px);
     }
 
     .score-container {
-        font-size: 16px;
-        padding: 8px;
+        padding: 10px 20px;
+        min-width: 150px;
     }
 
-    button {
-        font-size: 16px;
-        padding: 10px 20px;
+    .score-value {
+        font-size: 20px;
     }
 }
 

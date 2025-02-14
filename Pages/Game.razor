@@ -7,30 +7,32 @@
 @using Blazor2048.GameLogic
 @implements IDisposable
 
-<div class="game-container">
-    <ScoreDisplay Score="@gameManager.State.CurrentScore" />
+<div class="board-container">
+    <div class="game-container">
+        <ScoreDisplay Score="@gameManager.State.CurrentScore" />
 
-    @if (gameManager.State.IsGameOver)
-    {
-        <div class="game-over" role="alert">
-            <h2>@GameConstants.UI.GameOverMessage</h2>
-            <button @onclick="RestartGame" class="restart-button">
-                @GameConstants.UI.RestartButtonText
-            </button>
-        </div>
-    }
-
-    <ErrorBoundary>
-        <ChildContent>
-            <GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
-        </ChildContent>
-        <ErrorContent>
-            <div class="error-message" role="alert">
-                申し訳ありません。エラーが発生しました。
-                <button @onclick="RestartGame">ゲームをリスタート</button>
+        @if (gameManager.State.IsGameOver)
+        {
+            <div class="game-over" role="alert">
+                <h2>@GameConstants.UI.GameOverMessage</h2>
+                <button @onclick="RestartGame" class="restart-button">
+                    @GameConstants.UI.RestartButtonText
+                </button>
             </div>
-        </ErrorContent>
-    </ErrorBoundary>
+        }
+
+        <ErrorBoundary>
+            <ChildContent>
+                <GameBoard Board="gameManager.Board" OnKeyPress="HandleKeyPress" />
+            </ChildContent>
+            <ErrorContent>
+                <div class="error-message" role="alert">
+                    申し訳ありません。エラーが発生しました。
+                    <button @onclick="RestartGame">ゲームをリスタート</button>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
+    </div>
 </div>
 
 @code {
