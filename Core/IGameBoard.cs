@@ -2,8 +2,10 @@ namespace Blazor2048.Core;
 
 public interface IGameBoard
 {
+    Tile[,] Tiles { get; }
     bool MoveTiles(Direction direction);
     void AddNewTile();
     bool IsGameOver();
-    Tile[,] Tiles { get; }
+    bool CanMove(Direction direction);
+    event EventHandler<TileMergedEventArgs>? TileMerged;
 }
