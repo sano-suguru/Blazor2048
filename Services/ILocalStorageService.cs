@@ -1,3 +1,5 @@
+namespace Blazor2048.Services;
+
 public interface ILocalStorageService
 {
     ValueTask<T?> GetItemAsync<T>(string key);
