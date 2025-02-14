@@ -110,12 +110,11 @@ public class Board(IRandomGenerator random, ILogger<Board> logger) : IGameBoard
     }
 
     private List<Position> GetEmptyPositions() =>
-        Enumerable.Range(0, GameConstants.BoardSize)
+        [.. Enumerable.Range(0, GameConstants.BoardSize)
             .SelectMany(row =>
                 Enumerable.Range(0, GameConstants.BoardSize)
                     .Where(col => Tiles[row, col].IsEmpty)
-                    .Select(col => new Position(row, col)))
-            .ToList();
+                    .Select(col => new Position(row, col)))];
 
     private void CheckAndRaiseMergeEvents(Tile[,] originalTiles)
     {
