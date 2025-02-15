@@ -9,13 +9,16 @@
 
 <div class="board-container">
     <div class="game-container">
-        <ScoreDisplay Score="@gameManager.State.CurrentScore" />
+        <div class="score-board">
+            <ScoreDisplay Score="@gameManager.State.CurrentScore" />
+            <HighScoreDisplay />
+        </div>
 
         @if (gameManager.State.IsGameOver)
         {
             <div class="game-over" role="alert">
                 <h2>@GameConstants.UI.GameOverMessage</h2>
-                <button @onclick="RestartGame" class="restart-button">
+                <button @onclick="RestartGameAsync" class="restart-button">
                     @GameConstants.UI.RestartButtonText
                 </button>
             </div>
@@ -28,7 +31,7 @@
             <ErrorContent>
                 <div class="error-message" role="alert">
                     申し訳ありません。エラーが発生しました。
-                    <button @onclick="RestartGame">ゲームをリスタート</button>
+                    <button @onclick="RestartGameAsync">ゲームをリスタート</button>
                 </div>
             </ErrorContent>
         </ErrorBoundary>
@@ -58,7 +61,7 @@
         e.OldValue, e.NewValue, e.Position);
     }
 
-    private void HandleKeyPress(KeyboardEventArgs e)
+    private async Task HandleKeyPress(KeyboardEventArgs e)
     {
         if (gameManager.State.IsGameOver) return;
 
@@ -66,7 +69,7 @@
         {
             try
             {
-                gameManager.Move(move.Direction);
+                await gameManager.MoveAsync(move.Direction);
             }
             catch (GameException ex)
             {
@@ -75,10 +78,10 @@
         }
     }
 
-    private void RestartGame()
+    private async Task RestartGameAsync()
     {
         logger.LogInformation("Restarting game");
-        gameManager.Restart();
+        await gameManager.RestartAsync();
     }
 
     public void Dispose()

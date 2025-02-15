@@ -1,4 +1,5 @@
 using Blazor2048.Core;
+using Blazor2048.Services;
 
 namespace Blazor2048.GameLogic;
 
@@ -10,6 +11,7 @@ public class GameManager : IGameManager, IDisposable
     private readonly ILogger<GameManager> _logger;
     private readonly IRandomGenerator _randomGenerator;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IScoreService _scoreService;
     private bool _isDisposed;
 
     public event EventHandler<GameState>? StateChanged;
@@ -18,11 +20,13 @@ public class GameManager : IGameManager, IDisposable
     public GameManager(
         ILogger<GameManager> logger,
         IRandomGenerator randomGenerator,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IScoreService scoreService)
     {
         _logger = logger;
         _randomGenerator = randomGenerator;
         _loggerFactory = loggerFactory;
+        _scoreService = scoreService;
 
         Board = CreateNewBoard();
         State = GameState.Initial;
@@ -30,13 +34,13 @@ public class GameManager : IGameManager, IDisposable
         SubscribeToBoardEvents();
     }
 
-    public void Move(string direction)
+    public async Task MoveAsync(string direction)
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
         if (Enum.TryParse(direction, true, out Direction dir))
         {
-            Move(dir);
+            await MoveAsync(dir);
         }
         else
         {
@@ -44,7 +48,7 @@ public class GameManager : IGameManager, IDisposable
         }
     }
 
-    public void Move(Direction direction)
+    public async Task MoveAsync(Direction direction)
     {
         if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
         if (State.IsGameOver) return;
@@ -55,7 +59,7 @@ public class GameManager : IGameManager, IDisposable
 
             if (!Board.MoveTiles(direction)) return;
 
-            UpdateGameState();
+            await UpdateGameStateAsync();
         }
         catch (GameException ex)
         {
@@ -64,7 +68,7 @@ public class GameManager : IGameManager, IDisposable
         }
     }
 
-    public void Restart()
+    public async Task RestartAsync()
     {
         if (_isDisposed) throw new ObjectDisposedException(nameof(GameManager));
 
@@ -75,13 +79,13 @@ public class GameManager : IGameManager, IDisposable
         SubscribeToBoardEvents();
 
         State = GameState.Initial;
-        OnStateChanged();
+        await UpdateGameStateAsync();
     }
 
     private Board CreateNewBoard() =>
         new(_randomGenerator, _loggerFactory.CreateLogger<Board>());
 
-    private void UpdateGameState()
+    private async Task UpdateGameStateAsync()
     {
         var newScore = CalculateScore();
         var isGameOver = Board.IsGameOver();
@@ -96,6 +100,11 @@ public class GameManager : IGameManager, IDisposable
         {
             State = newState;
             OnStateChanged();
+
+            if (isGameOver)
+            {
+                await _scoreService.SaveHighScoreAsync(newScore);
+            }
         }
     }
 
@@ -105,13 +114,13 @@ public class GameManager : IGameManager, IDisposable
         return new Score(score);
     }
 
-    private void HandleTileMerged(object? sender, TileMergedEventArgs e)
+    private async void HandleTileMerged(object? sender, TileMergedEventArgs e)
     {
         _logger.LogDebug("Tile merged event received: {OldValue} -> {NewValue} at {Position}",
             e.OldValue, e.NewValue, e.Position);
 
         OnTileMerged(e);
-        UpdateGameState();
+        await UpdateGameStateAsync();
     }
 
     protected virtual void OnStateChanged()
