@@ -1,0 +1,92 @@
+.tile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(14px, 4vw, 36px);
+    font-weight: bold;
+    border-radius: var(--tile-radius);
+    transition: all 0.2s ease-in-out;
+    transform: scale(1);
+    will-change: transform, background, color;
+}
+
+.tile-new {
+    animation: scaleUp 0.2s ease-in-out;
+}
+
+.tile-move {
+    transition: transform 0.15s ease-in-out;
+}
+
+.tile-0 {
+    background: #cdc1b4;
+    color: transparent;
+}
+
+.tile-2 {
+    background: #eee4da;
+    color: var(--text-dark);
+}
+
+.tile-4 {
+    background: #ede0c8;
+    color: var(--text-dark);
+}
+
+.tile-8 {
+    background: #f2b179;
+    color: var(--text-light);
+}
+
+.tile-16 {
+    background: #f59563;
+    color: var(--text-light);
+}
+
+.tile-32 {
+    background: #f67c5f;
+    color: var(--text-light);
+}
+
+.tile-64 {
+    background: #f65e3b;
+    color: var(--text-light);
+}
+
+.tile-128 {
+    background: #edcf72;
+    color: var(--text-light);
+    font-size: clamp(16px, 4vw, 36px);
+}
+
+.tile-256 {
+    background: #edcc61;
+    color: var(--text-light);
+    font-size: clamp(16px, 4vw, 36px);
+}
+
+.tile-512 {
+    background: #edc850;
+    color: var(--text-light);
+    font-size: clamp(16px, 4vw, 36px);
+}
+
+.tile-1024 {
+    background: #edc53f;
+    color: var(--text-light);
+    font-size: clamp(14px, 3.5vw, 32px);
+}
+
+.tile-2048 {
+    background: #edc22e;
+    color: var(--text-light);
+    font-size: clamp(14px, 3.5vw, 32px);
+}
+
+.tile-super {
+    background: #3c3a32;
+    color: var(--text-light);
+    font-size: clamp(12px, 3vw, 28px);
+}

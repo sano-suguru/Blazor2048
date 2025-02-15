@@ -1,0 +1,35 @@
+.board {
+    display: grid;
+    grid-template-rows: repeat(4, minmax(60px, min(15vh, 15vw)));
+    grid-template-columns: repeat(4, minmax(60px, min(15vh, 15vw)));
+    gap: 8px;
+    background: var(--board-bg);
+    padding: 15px;
+    border-radius: var(--container-radius);
+    position: relative;
+    outline: none;
+    width: 100%;
+    max-width: calc(min(60vh, 60vw));
+    aspect-ratio: 1;
+    box-shadow: var(--shadow-normal);
+}
+
+.board:focus {
+    box-shadow: var(--shadow-focus);
+}
+
+@media (max-width: 600px) {
+    .board {
+        grid-template-rows: repeat(4, minmax(50px, 20vw));
+        grid-template-columns: repeat(4, minmax(50px, 20vw));
+        gap: 5px;
+        padding: 10px;
+    }
+}
+
+@media (max-height: 700px) {
+    .board {
+        grid-template-rows: repeat(4, minmax(45px, 13vh));
+        grid-template-columns: repeat(4, minmax(45px, 13vh));
+    }
+}
