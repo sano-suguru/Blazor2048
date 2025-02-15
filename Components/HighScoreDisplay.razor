@@ -1,0 +1,32 @@
+@using Blazor2048.Core
+@using Blazor2048.Services
+@implements IDisposable
+
+<div class="high-score-container" role="status" aria-live="polite">
+    <span class="high-score-label">ハイスコア</span>
+    <span class="high-score-value">@(CurrentHighScore?.Value.Value.ToString("N0") ?? "0")</span>
+</div>
+
+@code {
+    [Inject] private IScoreService ScoreService { get; set; } = default!;
+    [Inject] private ILogger<HighScoreDisplay> Logger { get; set; } = default!;
+
+    private HighScore? CurrentHighScore;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ScoreService.HighScoreUpdated += HandleHighScoreUpdated;
+        CurrentHighScore = await ScoreService.GetHighScoreAsync();
+    }
+
+    private void HandleHighScoreUpdated(object? sender, HighScore highScore)
+    {
+        CurrentHighScore = highScore;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ScoreService.HighScoreUpdated -= HandleHighScoreUpdated;
+    }
+}
