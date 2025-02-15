@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IRandomGenerator, DefaultRandomGenerator>();
 
         // スコープとして登録するサービス
+        services.AddScoped<IScoreService, ScoreService>();
         services.AddScoped<IGameManager, GameManager>();
         services.AddScoped<ILocalStorageService, LocalStorageService>();
         services.AddScoped<IGameStateService, GameStateService>();
