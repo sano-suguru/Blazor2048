@@ -140,18 +140,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## **💡 コントリビュート**
-🚀 **Blazor 2048 を一緒に改善しませんか？** 🚀  
-バグ報告や改善提案は [Issues](https://github.com/your-username/Blazor2048/issues) まで！
-
-1. `Fork` して `feature-branch` を作成
-2. 改善を加えて `Pull Request` を作成
-3. **2048 をさらに楽しくしよう！**
-
----
-
 ## **📢 クレジット**
-GitHub: [@your-username](https://github.com/sano-suguru)  
+GitHub: [@sano-suguru](https://github.com/sano-suguru)  
 ---
 
 ## **🎉 最後に**
