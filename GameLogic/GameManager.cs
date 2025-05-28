@@ -1,4 +1,5 @@
 using Blazor2048.Core;
+using Blazor2048.Core.Commands;
 using Blazor2048.Services;
 
 namespace Blazor2048.GameLogic;
@@ -12,6 +13,7 @@ public class GameManager : IGameManager, IDisposable
     private readonly IRandomGenerator _randomGenerator;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IScoreService _scoreService;
+    private readonly IMoveCommandFactory _moveCommandFactory;
     private bool _isDisposed;
 
     public event EventHandler<GameState>? StateChanged;
@@ -21,12 +23,14 @@ public class GameManager : IGameManager, IDisposable
         ILogger<GameManager> logger,
         IRandomGenerator randomGenerator,
         ILoggerFactory loggerFactory,
-        IScoreService scoreService)
+        IScoreService scoreService,
+        IMoveCommandFactory moveCommandFactory)
     {
         _logger = logger;
         _randomGenerator = randomGenerator;
         _loggerFactory = loggerFactory;
         _scoreService = scoreService;
+        _moveCommandFactory = moveCommandFactory;
 
         Board = CreateNewBoard();
         State = GameState.Initial;
@@ -57,14 +61,25 @@ public class GameManager : IGameManager, IDisposable
         {
             _logger.LogInformation("Attempting move in direction: {Direction}", direction);
 
-            if (!Board.MoveTiles(direction)) return;
+            // 既存のBoard.MoveTilesメソッドを使用（一時的に元に戻す）
+            if (!Board.MoveTiles(direction)) 
+            {
+                _logger.LogDebug("No movement occurred for direction {Direction}", direction);
+                return;
+            }
 
             await UpdateGameStateAsync();
+            _logger.LogInformation("Move completed successfully for direction {Direction}", direction);
         }
         catch (GameException ex)
         {
             _logger.LogError(ex, "Error during move operation");
             throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during move operation");
+            throw new GameException($"Move operation failed: {ex.Message}", ex);
         }
     }
 
